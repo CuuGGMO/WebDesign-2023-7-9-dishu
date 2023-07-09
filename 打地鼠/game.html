@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+
+        #gameArea {
+            margin: 0 auto;
+            display: block;
+            height: 900px;
+            width: 900px;
+            border: 1px solid black;
+            display: flex;
+            flex-wrap: wrap;
+            background-image: url(bg.png);
+          
+        }
+        #mole {
+            position: absolute;
+            height: 80px;
+            width: 80px;
+        }
+        title {
+            text-align: center;
+            font-family: "黑体";
+            font-size: 30pt;
+            font-weight: bold;
+        }
+        .hole{
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 30px; /* 设置每个Hole之间的间隔为30px */
+            background-image: url("hole.png");
+        }
+        p {
+            text-align: center;
+            background-color: #918e8e;
+            font-size: 30px;
+            font-family: "黑体"; 
+        }
+        h1{
+          text-align: center;
+          font-size: 50px;
+          font-family: "黑体";
+          color: #f8b600;
+        }
+        body {
+    cursor: url('hammer_1.png'), auto;
+        }
+        body.hammer-down {
+    cursor: url('hammer_2.png'), auto;
+        }
+    </style>
+</head>
+<body>
+
+<title>打地鼠游戏</title>
+
+<audio id="bgMusic" src="bgm.mp3" autoplay></audio>
+<audio id="hitSound" src="hit.mp3"></audio>
+
+
+<div id="gameArea"> 
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+  <div class="hole"><img class="mole" src="mole_1.png" style="display: none;"></div>
+
+</div>
+
+<p>得分: <span id="score">0</span></p>
+<p>时间: <span id="timer">30</span>秒</p>
+<h1>！击打地鼠开始游戏！</h1>
+<script>
+      document.body.addEventListener('mousedown', function() { //监听鼠标down和up事件，改变锤子状态
+      document.body.classList.add('hammer-down');
+      });
+      document.body.addEventListener('mouseup', function() {
+          document.body.classList.remove('hammer-down');
+      });
+
+var score = 0;
+
+function increaseScore(mole) {
+    score++;
+    document.getElementById("score").innerText = score;//积分系统
+}
+
+var interval = 1000; // 初始间隔为1000毫秒
+var minInterval = 700; //设置最小间隔为600毫秒
+var moveMoleInterval;
+
+function moveMole() {
+  var holes = document.getElementsByClassName("hole");
+  var mole = document.getElementsByClassName("mole");
+  for (var i = 0; i < mole.length; i++) {
+    mole[i].style.display = "none";
+    mole[i].src = "mole_1.png"; // 还原地鼠的图片
+  }
+  var randomHole = holes[Math.floor(Math.random() * holes.length)];
+  randomHole.children[0].style.display = "block";//随机移动地鼠的位置
+}
+
+
+var moles = document.getElementsByClassName("mole");
+var time = 30;
+var timerElement = document.getElementById("timer");
+var timer;
+
+// 当地鼠被点击时，更改地鼠的图片并增加分数，播放音效，第一次点击地鼠时，开始30s倒计时
+for (var i = 0; i < moles.length; i++) {
+  moles[i].addEventListener("click", function() {
+    this.src = "mole_2.png"; // 新的图片
+    increaseScore(this); // 增加分数
+    document.getElementById("hitSound").play(); // 播放音效
+
+    interval *= 0.95; // 每次点击后，间隔减少5%
+    if (interval < minInterval) { // 如果新的间隔小于最小间隔
+      interval = minInterval; // 将间隔设置为最小间隔
+    }
+    clearInterval(moveMoleInterval); // 清除旧的计时器
+    moveMoleInterval = setInterval(moveMole, interval); // 用新的间隔开始新的计时器
+
+    if (!timer) {
+      timer = setInterval(function() {
+        time--;
+        timerElement.innerText = time;
+        if (time <= 0) { // 如果时间达到0秒
+          clearInterval(timer); // 停止计时器
+          clearInterval(moveMoleInterval); // 停止移动地鼠
+          document.getElementById("bgMusic").pause(); // 停止背景音乐
+          alert("游戏结束！你的分数是" + score); // 显示弹窗
+        }
+      }, 1000);
+      document.getElementById("bgMusic").play(); // 播放背景音乐
+    }
+  });
+}
+
+window.onload = function() {
+    moveMole();
+};
+
+</script>
+</body>
+</html>
